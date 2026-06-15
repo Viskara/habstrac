@@ -287,6 +287,31 @@
     .tab-pills::-webkit-scrollbar { display: none; }
     .tab-pill { background: var(--card2); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); font-size: 0.78rem; font-weight: 600; padding: 5px 13px; cursor: pointer; white-space: nowrap; }
     .tab-pill.active { background: var(--accent-dim); border-color: rgba(16,185,129,0.3); color: var(--accent); }
+    /* Goals */
+    .goal-card { background: var(--card2); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--accent); }
+    .goal-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .goal-name { font-weight: 700; font-size: 0.97rem; }
+    .goal-category { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text3); margin-top: 2px; }
+    .goal-date { font-size: 0.75rem; color: var(--text3); text-align: right; }
+    .goal-days { font-size: 0.72rem; color: var(--amber); font-weight: 700; }
+    .goal-progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .goal-current { font-size: 1.4rem; font-weight: 800; }
+    .goal-target { font-size: 0.82rem; color: var(--text3); }
+    .goal-bar-track { background: rgba(255,255,255,0.06); border-radius: 10px; height: 8px; position: relative; margin-bottom: 10px; overflow: visible; }
+    .goal-bar-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; min-width: 4px; }
+    .goal-milestones { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .milestone { font-size: 0.75rem; padding: 3px 9px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); color: var(--text3); cursor: pointer; transition: all 0.15s; }
+    .milestone.reached { background: var(--accent-dim); border-color: rgba(16,185,129,0.3); color: var(--accent); }
+    .milestone.manual-done { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .goal-projected { font-size: 0.75rem; color: var(--text3); margin-top: 6px; }
+    .goal-projected span { color: var(--accent); font-weight: 600; }
+
+    /* Import result */
+    .import-success { color: var(--accent); }
+    .import-error { color: var(--red); }
+
+    .btn-add-log { width: 100%; margin-top: 6px; padding: 11px; background: rgba(59,130,246,0.06); color: var(--blue); border: 1px dashed rgba(59,130,246,0.25); border-radius: var(--radius); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+
   </style>
 </head>
 <body>
@@ -329,6 +354,7 @@
   <div id="progress-view" class="view">
     <div class="tab-pills" id="progress-tabs">
       <div class="tab-pill active" onclick="switchProgressTab('overview')">Overview</div>
+      <div class="tab-pill" onclick="switchProgressTab('goals')">Goals</div>
       <div class="tab-pill" onclick="switchProgressTab('body')">Body</div>
       <div class="tab-pill" onclick="switchProgressTab('prs')">PRs</div>
       <div class="tab-pill" onclick="switchProgressTab('insights')">Insights</div>
@@ -336,6 +362,7 @@
       <div class="tab-pill" onclick="switchProgressTab('backlog')">Backlog</div>
     </div>
     <div id="progress-overview" class="progress-sub"></div>
+    <div id="progress-goals" class="progress-sub" style="display:none"></div>
     <div id="progress-body" class="progress-sub" style="display:none"></div>
     <div id="progress-prs" class="progress-sub" style="display:none"></div>
     <div id="progress-insights" class="progress-sub" style="display:none"></div>
@@ -345,6 +372,12 @@
 
   <!-- SETTINGS -->
   <div id="settings-view" class="view">
+    <div class="section-title">Quick Actions</div>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button class="btn-primary" style="flex:1" onclick="openQuickAdd()">+ Quick Add Row</button>
+      <button class="btn-primary" style="flex:1;background:var(--blue)" onclick="openCSVImport()">⬆ Import CSV</button>
+    </div>
+
     <div class="section-title">Connection</div>
     <div class="card" style="border-left-color:#9c27b0; overflow:visible;">
       <div class="card-main" style="flex-direction:column; cursor:default;">
@@ -397,6 +430,91 @@
     </div>
   </div>
 
+</div>
+
+<!-- Quick Add Log Modal -->
+<div class="modal-overlay" id="quick-add-modal" onclick="if(event.target===this)closeModal('quick-add-modal')">
+  <div class="modal">
+    <h2>Quick Add</h2>
+    <div class="modal-field">
+      <label>Date</label>
+      <input type="date" id="qa-date">
+    </div>
+    <div class="modal-field">
+      <label>Type</label>
+      <select id="qa-logtype">
+        <option>Workout - Push</option>
+        <option>Workout - Pull</option>
+        <option>Workout - Legs</option>
+        <option>Workout - Full Body</option>
+        <option>Workout - Core</option>
+        <option>Cardio</option>
+        <option>Body Metrics</option>
+        <option>Nutrition</option>
+        <option>Recovery</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Exercise / Item</label>
+      <input type="text" id="qa-item" placeholder="e.g. DB Floor Press">
+    </div>
+    <div class="input-row" style="padding:0 0 10px">
+      <div class="modal-field" style="flex:1;margin:0">
+        <label>Weight (kg)</label>
+        <input type="number" id="qa-weight" placeholder="0" step="0.5">
+      </div>
+      <div class="modal-field" style="flex:1;margin:0">
+        <label>Sets</label>
+        <input type="number" id="qa-sets" placeholder="4" min="0">
+      </div>
+    </div>
+    <div class="input-row" style="padding:0 0 10px">
+      <div class="modal-field" style="flex:1;margin:0">
+        <label>Reps</label>
+        <input type="text" id="qa-reps" placeholder="12-15">
+      </div>
+      <div class="modal-field" style="flex:1;margin:0">
+        <label>RIR</label>
+        <input type="number" id="qa-rir" placeholder="1-2" min="0" max="5">
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Tempo</label>
+      <input type="text" id="qa-tempo" placeholder="3-0-1-0">
+    </div>
+    <div class="modal-field">
+      <label>Notes</label>
+      <input type="text" id="qa-notes" placeholder="Optional">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('quick-add-modal')">Cancel</button>
+      <button class="btn-primary" style="flex:2" onclick="submitQuickAdd()">Add to Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV Import Modal -->
+<div class="modal-overlay" id="csv-import-modal" onclick="if(event.target===this)closeModal('csv-import-modal')">
+  <div class="modal">
+    <h2>Import Data</h2>
+    <div class="modal-field">
+      <label>Import into</label>
+      <select id="csv-sheet">
+        <option value="Logs">Logs (workouts, nutrition, metrics)</option>
+        <option value="Tasks">Tasks (guitar, photography, etc)</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Paste CSV or tab-separated data</label>
+      <textarea id="csv-input" style="min-height:140px;font-size:0.75rem;font-family:monospace" placeholder="Paste your data here. First row must be column headers matching your sheet.&#10;&#10;Example:&#10;Date,Log Type,Item / Exercise,Weight (kg) / Value,Target Sets,Target Reps&#10;2026-07-01,Workout - Push,DB Floor Press,17.5,4,12-15"></textarea>
+      <div class="modal-hint">First row = headers. Tabs or commas both work. Missing columns get default values.</div>
+    </div>
+    <div id="csv-result" style="font-size:0.82rem;color:var(--accent);margin-bottom:10px;display:none"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('csv-import-modal')">Cancel</button>
+      <button class="btn-primary" style="flex:2" onclick="submitCSVImport()">Import</button>
+    </div>
+  </div>
 </div>
 
 <!-- Add Task Modal -->

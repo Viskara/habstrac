@@ -1222,3 +1222,280 @@ function showToast(msg) {
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  AUTO PROGRESSION
+// ═══════════════════════════════════════════════════════════════
+
+async function runAutoProgression(date, item) {
+  try {
+    const result = await apiPost({ action: 'autoProgression', date, item });
+    if (result.success && result.action !== 'none' && result.action !== 'hold') {
+      let msg = '';
+      if (result.action === 'weight_increase') msg = `📈 Next ${item}: ${result.newWeight}kg`;
+      if (result.action === 'rep_increase')    msg = `📈 Next ${item}: reps → ${result.newReps}`;
+      if (result.action === 'deload')          msg = `📉 ${item}: deload to ${result.newWeight}kg`;
+      if (msg) showToast(msg);
+    }
+  } catch(e) { console.error('Progression error', e); }
+}
+
+// Hook into saveLogActual — call progression after saving
+const _origSaveLogActual = saveLogActual;
+saveLogActual = async function(date, item) {
+  await _origSaveLogActual(date, item);
+  // Only run for workout items
+  const row = _allLogs.find(r => r.Date === date && r['Item / Exercise'] === item);
+  if (row && row['Log Type'] && row['Log Type'].startsWith('Workout')) {
+    await runAutoProgression(date, item);
+    // Reload so next session card shows updated weight
+    await loadAll();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  GOALS
+// ═══════════════════════════════════════════════════════════════
+
+let _goals = [];
+
+// Load goals as part of loadAll
+const _origLoadAll = loadAll;
+loadAll = async function() {
+  await _origLoadAll();
+  try {
+    _goals = await apiFetch({ action: 'getGoals' });
+    if (_progressTab === 'goals') renderGoals();
+  } catch(e) { console.warn('Goals sheet not found — skipping'); }
+};
+
+function renderGoals() {
+  const el = document.getElementById('progress-goals');
+  if (!el) return;
+
+  if (!_goals.length) {
+    el.innerHTML = `<div class="empty-state">No goals yet.<br><br>Add a <strong>Goals</strong> sheet with columns:<br>Goal · Category · Target · Target Date · Metric · Milestones · Color<br><br>See setup guide below.</div>
+    <div class="insight-card" style="margin-top:10px">
+      <div class="insight-label">Goals sheet columns</div>
+      <div class="insight-text" style="font-size:0.8rem;line-height:1.8">
+        <strong>Goal</strong> — name e.g. "DB Floor Press 30kg"<br>
+        <strong>Category</strong> — Strength / Body / Guitar / Photography<br>
+        <strong>Target</strong> — the number to reach e.g. 30<br>
+        <strong>Target Date</strong> — e.g. 2026-12-31<br>
+        <strong>Metric</strong> — Bodyweight (kg) / PR / Task Count / Manual<br>
+        <strong>Milestones</strong> — pipe-separated e.g. 20|22.5|25|27.5|30<br>
+        <strong>Color</strong> — hex e.g. #10b981<br>
+        <strong>Completed Milestones</strong> — leave blank, app fills this
+      </div>
+    </div>`;
+    return;
+  }
+
+  const today = localToday();
+  let html = '';
+
+  _goals.forEach(goal => {
+    const name       = goal['Goal'] || '';
+    const category   = goal['Category'] || '';
+    const target     = Number(goal['Target'] || 0);
+    const targetDate = goal['Target Date'] || '';
+    const metric     = goal['Metric'] || 'Manual';
+    const color      = goal['Color'] || 'var(--accent)';
+    const milestonesRaw = (goal['Milestones'] || '').split('|').map(s => s.trim()).filter(Boolean);
+    const completedRaw  = (goal['Completed Milestones'] || '').split('|').map(s => s.trim()).filter(Boolean);
+
+    let current = goal['Current'];
+
+    // For manual goals, count completed milestones as proxy
+    if (metric === 'Manual' && current === null) {
+      current = completedRaw.length;
+    }
+
+    // Progress percentage
+    let pct = 0;
+    let startVal = 0;
+
+    if (metric === 'Bodyweight (kg)') {
+      // For weight loss: progress = how far from start toward target
+      const bwRows = _allLogs.filter(r => r['Item / Exercise'] === 'Bodyweight (kg)' && r['Actual Value']).sort((a,b) => a.Date.localeCompare(b.Date));
+      startVal = bwRows.length ? Number(bwRows[0]['Actual Value']) : target;
+      const totalChange = Math.abs(startVal - target);
+      const currentChange = Math.abs(startVal - (current || startVal));
+      pct = totalChange ? Math.min(100, Math.round(currentChange / totalChange * 100)) : 0;
+    } else if (metric === 'Manual') {
+      pct = milestonesRaw.length ? Math.min(100, Math.round(completedRaw.length / milestonesRaw.length * 100)) : 0;
+    } else {
+      pct = target ? Math.min(100, Math.round((current || 0) / target * 100)) : 0;
+    }
+
+    // Days remaining
+    const daysLeft = targetDate ? Math.max(0, Math.round((new Date(targetDate) - new Date(today)) / 86400000)) : null;
+
+    // Projected completion
+    let projected = null;
+    if (metric === 'Task Count' && current > 0) {
+      const firstTask = _allTasks.filter(t => t['Category'] === category && t.Status === 'Completed').sort((a,b) => a.Date.localeCompare(b.Date))[0];
+      if (firstTask) {
+        const daysSinceStart = daysSince(firstTask.Date) || 1;
+        const rate = current / daysSinceStart; // tasks per day
+        const remaining = target - current;
+        const daysToComplete = rate > 0 ? Math.round(remaining / rate) : null;
+        if (daysToComplete) projected = addDays(today, daysToComplete);
+      }
+    }
+
+    // Milestone display — auto-mark based on current value for numeric metrics
+    const milestoneHTML = milestonesRaw.map((m, i) => {
+      let reached = false;
+      if (metric === 'Manual') {
+        reached = completedRaw.includes(m);
+      } else {
+        reached = current !== null && Number(m) <= current;
+      }
+      const manualDone = completedRaw.includes(m);
+      return `<span class="milestone ${reached?'reached':''} ${manualDone&&metric==='Manual'?'manual-done':''}"
+        onclick="toggleMilestone('${name}','${m}','${completedRaw.join('|')}')"
+        title="${metric === 'Manual' ? 'Tap to mark done' : ''}">${m}</span>`;
+    }).join('');
+
+    html += `<div class="goal-card" style="border-left-color:${color}">
+      <div class="goal-top">
+        <div>
+          <div class="goal-name">${name}</div>
+          <div class="goal-category">${category}</div>
+        </div>
+        <div class="goal-date">
+          ${targetDate ? `<div>${targetDate}</div>` : ''}
+          ${daysLeft !== null ? `<div class="goal-days">${daysLeft}d left</div>` : ''}
+        </div>
+      </div>
+
+      <div class="goal-progress-row">
+        <div class="goal-current" style="color:${color}">
+          ${current !== null ? current : '—'}
+          <span style="font-size:0.8rem;color:var(--text3);font-weight:400"> / ${target}${metric === 'Task Count' ? ' tasks' : metric === 'Bodyweight (kg)' ? 'kg' : metric === 'PR' ? 'kg' : ''}</span>
+        </div>
+        <div style="font-size:1.1rem;font-weight:800;color:${color}">${pct}%</div>
+      </div>
+
+      <div class="goal-bar-track">
+        <div class="goal-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+
+      ${milestonesRaw.length ? `<div class="goal-milestones">${milestoneHTML}</div>` : ''}
+
+      ${projected ? `<div class="goal-projected">At current rate: on track for <span>${projected}</span></div>` : ''}
+      ${pct >= 100 ? `<div style="font-size:0.85rem;color:var(--accent);font-weight:700;margin-top:6px">🏆 Goal achieved!</div>` : ''}
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+async function toggleMilestone(goalName, milestone, currentCompleted) {
+  const completedArr = currentCompleted.split('|').map(s => s.trim()).filter(Boolean);
+  const idx = completedArr.indexOf(milestone);
+  if (idx > -1) completedArr.splice(idx, 1);
+  else completedArr.push(milestone);
+
+  try {
+    await apiPost({ action: 'updateGoalMilestone', goal: goalName, completedMilestones: completedArr.join('|') });
+    const goal = _goals.find(g => g['Goal'] === goalName);
+    if (goal) goal['Completed Milestones'] = completedArr.join('|');
+    renderGoals();
+  } catch(e) { console.error(e); }
+}
+
+// Hook renderProgressTab to include goals
+const _origRenderProgressTab = renderProgressTab;
+renderProgressTab = function(tab) {
+  if (tab === 'goals') { renderGoals(); return; }
+  _origRenderProgressTab(tab);
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  QUICK ADD LOG
+// ═══════════════════════════════════════════════════════════════
+
+function openQuickAdd() {
+  const modal = document.getElementById('quick-add-modal');
+  if (!modal) return;
+  // Default to today
+  document.getElementById('qa-date').value = localToday();
+  modal.classList.add('open');
+}
+
+async function submitQuickAdd() {
+  const date    = document.getElementById('qa-date').value;
+  const logType = document.getElementById('qa-logtype').value;
+  const item    = document.getElementById('qa-item').value.trim();
+  const weight  = document.getElementById('qa-weight').value;
+  const sets    = document.getElementById('qa-sets').value;
+  const reps    = document.getElementById('qa-reps').value;
+  const rir     = document.getElementById('qa-rir').value;
+  const tempo   = document.getElementById('qa-tempo').value;
+  const notes   = document.getElementById('qa-notes').value;
+
+  if (!item) { alert('Exercise / Item name is required.'); return; }
+  if (!date) { alert('Date is required.'); return; }
+
+  try {
+    const result = await apiPost({ action: 'quickAddLog', date, logType, item, weight, sets, reps, rir, tempo, notes });
+    if (result.success) {
+      closeModal('quick-add-modal');
+      // Clear fields except date and type
+      ['qa-item','qa-weight','qa-sets','qa-reps','qa-rir','qa-tempo','qa-notes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      showToast('Row added to plan');
+      await loadAll();
+    }
+  } catch(e) { console.error(e); showToast('Error adding row'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CSV IMPORT
+// ═══════════════════════════════════════════════════════════════
+
+function openCSVImport() {
+  const modal = document.getElementById('csv-import-modal');
+  if (!modal) return;
+  document.getElementById('csv-result').style.display = 'none';
+  document.getElementById('csv-input').value = '';
+  modal.classList.add('open');
+}
+
+async function submitCSVImport() {
+  const sheetName = document.getElementById('csv-sheet').value;
+  const csvText   = document.getElementById('csv-input').value.trim();
+  const resultEl  = document.getElementById('csv-result');
+
+  if (!csvText) { alert('Paste some data first.'); return; }
+
+  // Auto-detect tabs vs commas
+  const firstLine = csvText.split('\n')[0];
+  const isTabbed  = firstLine.includes('\t');
+  // If tabbed, convert to CSV
+  const normalised = isTabbed
+    ? csvText.split('\n').map(line => line.split('\t').map(cell => `"${cell.replace(/"/g,'""')}"`).join(',')).join('\n')
+    : csvText;
+
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<span style="color:var(--text3)">Importing…</span>';
+
+  try {
+    const result = await apiPost({ action: 'importCSV', sheetName, csvText: normalised });
+    if (result.success) {
+      resultEl.innerHTML = `<span class="import-success">✓ ${result.added} rows imported${result.skipped ? `, ${result.skipped} skipped` : ''}</span>`;
+      if (result.errors && result.errors.length) {
+        resultEl.innerHTML += `<br><span class="import-error">${result.errors.join('<br>')}</span>`;
+      }
+      await loadAll();
+    } else {
+      resultEl.innerHTML = `<span class="import-error">Error: ${result.error}</span>`;
+    }
+  } catch(e) {
+    resultEl.innerHTML = `<span class="import-error">Error: ${e.message}</span>`;
+  }
+}
