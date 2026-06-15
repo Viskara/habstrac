@@ -54,16 +54,18 @@ async function loadLogs() {
     });
     const data = await response.json();
 
-    // If the backend returned an error object instead of an array, throw it
     if (data && data.error) {
       throw new Error(data.error);
     }
     
-    // Get today's date in YYYY-MM-DD local time
-    const today = new Date();
-    const offset = today.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(today - offset)).toISOString().split('T')[0];
+    // Get today's date in YYYY-MM-DD using the browser's actual local timezone (Perth AWST)
+    const localISOTime = new Date().toLocaleDateString('sv-SE', {
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
     
+    console.log('Today (local):', localISOTime);
+    console.log('Sample dates from sheet:', data.slice(0, 3).map(r => r.Date));
+
     const todaysTasks = data.filter(row => row.Date === localISOTime);
     renderLogs(todaysTasks, localISOTime);
   } catch (err) {
@@ -85,10 +87,18 @@ async function loadRecipes() {
     });
     const data = await response.json();
 
-    // If the backend returned an error object instead of an array, throw it
     if (data && data.error) {
       throw new Error(data.error);
     }
+
+    // DEBUG: log recipe keys so you can confirm column name spelling
+    if (data.length > 0) {
+      console.log('Recipe keys from sheet:', Object.keys(data[0]));
+      console.log('First recipe row:', data[0]);
+    } else {
+      console.warn('Recipes sheet returned 0 rows.');
+    }
+
     renderRecipes(data);
   } catch (err) {
     console.error('Recipes fetch error:', err);
@@ -138,16 +148,26 @@ function renderLogs(tasks, dateStr) {
 
 function renderRecipes(recipes) {
   const container = document.getElementById('recipes-container');
+
+  if (!recipes || recipes.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:20px;">No recipes found. Check your Recipes sheet has data and correct column headers.</div>';
+    return;
+  }
+
   let html = '';
-  
   recipes.forEach(recipe => {
+    const name = recipe['Recipe Name'] ?? recipe[Object.keys(recipe)[0]] ?? 'Unnamed Recipe';
+    const calories = recipe['Calories (kcal)'] ?? '—';
+    const protein = recipe['Protein (g)'] ?? '—';
+    const method = recipe['Ingredients / Method'] ?? recipe['Ingredients/Method'] ?? recipe['Method'] ?? '';
+
     html += `
       <div class="card recipe">
-        <div class="title">${recipe['Recipe Name']}</div>
+        <div class="title">${name}</div>
         <div class="macro-pill">
-          <strong>${recipe['Calories (kcal)']}</strong> kcal &bull; <strong>${recipe['Protein (g)']}g</strong> Protein
+          <strong>${calories}</strong> kcal &bull; <strong>${protein}g</strong> Protein
         </div>
-        <div class="details">${recipe['Ingredients / Method']}</div>
+        <div class="details">${method}</div>
       </div>
     `;
   });
