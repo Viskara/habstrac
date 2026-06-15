@@ -8,243 +8,460 @@
   <link rel="icon" type="image/png" href="icon-192.png">
   <style>
     :root {
-      --bg: #0f1115;
-      --card: #1a1d24;
-      --card2: #1e2128;
+      --bg: #0c0e12;
+      --card: #141720;
+      --card2: #1a1d26;
+      --border: rgba(255,255,255,0.07);
       --text: #f0f2f5;
+      --text2: #9ca3af;
+      --text3: #6b7280;
       --accent: #10b981;
-      --accent-hover: #059669;
-      --muted: #6b7280;
-      --muted2: #9ca3af;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --recipe: #3b82f6;
-      --shadow: 0 2px 8px rgba(0,0,0,0.3);
-      --radius: 10px;
+      --accent2: #059669;
+      --accent-dim: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --blue: #3b82f6;
+      --blue-dim: rgba(59,130,246,0.12);
+      --purple: #a78bfa;
+      --purple-dim: rgba(167,139,250,0.12);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.12);
+      --pink: #f472b6;
+      --shadow: 0 2px 12px rgba(0,0,0,0.4);
+      --radius: 12px;
+      --radius-sm: 8px;
     }
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0 0 80px; -webkit-tap-highlight-color: transparent; font-size: 15px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0 0 72px; -webkit-tap-highlight-color: transparent; font-size: 15px; line-height: 1.5; }
+    
+    /* ── Header ── */
+    header { padding: 14px 16px 12px; background: rgba(20,23,32,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .header-title { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.2px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .readiness-badge { font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--accent-dim); color: var(--accent); cursor: pointer; }
+    .consistency-badge { font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--purple-dim); color: var(--purple); }
 
-    /* Header */
-    header { padding: 16px 20px; background: rgba(26,29,36,0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; }
-    h1 { margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; }
-
-    .container { padding: 14px; }
+    /* ── Layout ── */
+    .container { padding: 12px; }
     .view { display: none; }
     .view.active { display: block; }
 
-    /* Sections */
-    .section { margin-bottom: 18px; }
-    .section-header { display: flex; align-items: center; gap: 8px; padding: 7px 12px; margin-bottom: 6px; border-left: 4px solid; border-radius: 4px; background: rgba(255,255,255,0.03); }
-    .section-icon { font-size: 0.95rem; }
-    .section-label { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted2); flex-grow: 1; }
-    .section-badge { font-size: 0.72rem; font-weight: 700; color: var(--accent); background: rgba(16,185,129,0.15); padding: 2px 8px; border-radius: 10px; }
+    /* ── Section ── */
+    .section { margin-bottom: 16px; }
+    .section-header { display: flex; align-items: center; gap: 8px; padding: 7px 11px; margin-bottom: 6px; border-left: 4px solid; border-radius: 5px; background: rgba(255,255,255,0.025); }
+    .section-icon { font-size: 0.9rem; }
+    .section-label { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); flex-grow: 1; }
+    .section-badge { font-size: 0.7rem; font-weight: 700; color: var(--accent); background: var(--accent-dim); padding: 2px 8px; border-radius: 10px; }
+    .section-push-btn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: var(--amber); border-radius: 6px; font-size: 0.72rem; font-weight: 700; padding: 3px 9px; cursor: pointer; }
 
-    /* Cards */
-    .card { background: var(--card2); margin-bottom: 8px; border-radius: var(--radius); border-left: 4px solid var(--accent); box-shadow: var(--shadow); overflow: hidden; }
-    .card-main { display: flex; align-items: flex-start; padding: 14px 14px 12px; cursor: pointer; }
+    /* ── Cards ── */
+    .card { background: var(--card2); margin-bottom: 7px; border-radius: var(--radius); border-left: 4px solid; box-shadow: var(--shadow); overflow: hidden; }
+    .card-main { display: flex; align-items: flex-start; padding: 13px 13px 11px; cursor: pointer; user-select: none; }
     .card-main:active { background: rgba(255,255,255,0.02); }
-    .card-content { flex-grow: 1; }
+    .card-content { flex-grow: 1; min-width: 0; }
     .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-    .title { font-weight: 600; font-size: 0.97rem; line-height: 1.3; }
-    .details { color: var(--muted2); font-size: 0.84rem; line-height: 1.5; margin-top: 4px; }
-    .note-text { color: var(--muted); font-style: italic; font-size: 0.82rem; }
-    .card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .expand-icon { color: var(--muted); font-size: 0.9rem; transition: transform 0.2s; }
+    .title { font-weight: 600; font-size: 0.95rem; line-height: 1.3; }
+    .details { color: var(--text2); font-size: 0.82rem; line-height: 1.5; margin-top: 3px; }
+    .note-text { color: var(--text3); font-style: italic; font-size: 0.8rem; }
+    .card-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; margin-top: 1px; }
+    .expand-icon { color: var(--text3); font-size: 0.8rem; transition: transform 0.2s; line-height: 1; }
     .card.expanded .expand-icon { transform: rotate(180deg); }
-
-    /* Completed state */
-    .card.is-completed .card-main { opacity: 0.45; }
+    .card.is-completed .card-main { opacity: 0.4; }
     .completed .title { text-decoration: line-through; }
-    .card.is-pushed { border-left-color: var(--warning) !important; }
-    .card.is-skipped { opacity: 0.35; }
+    .card.is-pushed { border-left-color: var(--amber) !important; }
+    .card.is-skipped { opacity: 0.3; }
 
-    /* Expandable area */
-    .card-expand { display: none; border-top: 1px solid rgba(255,255,255,0.06); }
+    /* PR badge */
+    .pr-badge { font-size: 0.7rem; font-weight: 700; color: #fbbf24; background: rgba(251,191,36,0.12); padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
+    .overload-hint { font-size: 0.75rem; color: var(--accent); margin-top: 3px; }
+    .stall-hint { font-size: 0.75rem; color: var(--amber); margin-top: 3px; }
+
+    /* ── Expand area ── */
+    .card-expand { display: none; border-top: 1px solid var(--border); }
     .card.expanded .card-expand { display: block; }
-
-    /* Actual inputs */
-    .actual-inputs { padding: 14px; }
-    .actual-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; }
-    .input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-    .input-row label { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; color: var(--muted2); flex: 1; min-width: 70px; }
-    .actual-field { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); padding: 8px 10px; font-size: 0.95rem; width: 100%; transition: border-color 0.2s; }
+    .actual-inputs { padding: 13px; }
+    .actual-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 9px; }
+    .input-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .input-row label { display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; color: var(--text2); flex: 1; min-width: 65px; }
+    .actual-field { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.09); border-radius: 6px; color: var(--text); padding: 8px 9px; font-size: 0.92rem; width: 100%; }
     .actual-field:focus { outline: none; border-color: var(--accent); }
-    .actual-notes { width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: var(--text); padding: 9px 11px; font-size: 0.88rem; resize: vertical; min-height: 64px; margin-bottom: 12px; font-family: inherit; }
+    .actual-notes { width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.07); border-radius: 6px; color: var(--text); padding: 9px 10px; font-size: 0.85rem; resize: vertical; min-height: 58px; margin-bottom: 10px; font-family: inherit; }
     .actual-notes:focus { outline: none; border-color: var(--accent); }
-    .expand-actions { display: flex; gap: 8px; }
-    .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 9px 18px; font-size: 0.88rem; font-weight: 700; cursor: pointer; flex: 1; }
-    .btn-save:active { background: var(--accent-hover); }
-    .btn-skip { background: rgba(255,255,255,0.06); color: var(--muted2); border: none; border-radius: 7px; padding: 9px 14px; font-size: 0.88rem; cursor: pointer; }
+    .expand-actions { display: flex; gap: 7px; }
+    .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 9px 16px; font-size: 0.86rem; font-weight: 700; cursor: pointer; flex: 1; }
+    .btn-save:active { background: var(--accent2); }
+    .btn-skip { background: rgba(255,255,255,0.05); color: var(--text2); border: none; border-radius: 7px; padding: 9px 12px; font-size: 0.86rem; cursor: pointer; }
 
-    /* Push button */
-    .push-btn { background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: var(--muted2); font-size: 0.78rem; padding: 3px 7px; cursor: pointer; display: flex; align-items: center; gap: 3px; }
-    .push-btn:active { background: rgba(245,158,11,0.1); border-color: var(--warning); }
-    .push-count { color: var(--warning); font-weight: 700; }
-    .pushed-tag { font-size: 0.75rem; color: var(--warning); margin-top: 5px; }
+    /* ── Push btn ── */
+    .push-btn { background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text3); font-size: 0.75rem; padding: 3px 6px; cursor: pointer; display: flex; align-items: center; gap: 3px; }
+    .push-count { color: var(--amber); font-weight: 700; }
+    .pushed-tag { font-size: 0.72rem; color: var(--amber); margin-top: 4px; }
 
-    /* Checkbox */
-    input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid var(--muted); border-radius: 50%; margin-right: 12px; margin-top: 1px; cursor: pointer; position: relative; transition: all 0.18s; flex-shrink: 0; }
+    /* ── Checkbox ── */
+    input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid var(--text3); border-radius: 50%; margin-right: 11px; margin-top: 1px; cursor: pointer; position: relative; transition: all 0.18s; flex-shrink: 0; }
     input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
-    input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 13px; font-weight: 700; left: 3px; top: 2px; }
+    input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 12px; font-weight: 700; left: 4px; top: 2px; }
 
-    /* Subtasks */
-    .subtask-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
-    .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--muted2); cursor: pointer; }
-    .subtask-item input[type=checkbox] { width: 18px; height: 18px; margin: 0; }
-    .subtask-progress { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
+    /* ── Subtasks ── */
+    .subtask-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
+    .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--text2); cursor: pointer; }
+    .subtask-item input[type=checkbox] { width: 17px; height: 17px; margin: 0; }
+    .subtask-progress { font-size: 0.72rem; color: var(--text3); margin-bottom: 9px; }
 
-    /* Add task button */
-    .btn-add-task { width: 100%; margin-top: 8px; padding: 12px; background: rgba(16,185,129,0.08); color: var(--accent); border: 1px dashed rgba(16,185,129,0.3); border-radius: var(--radius); font-size: 0.92rem; font-weight: 600; cursor: pointer; }
-    .btn-add-task:active { background: rgba(16,185,129,0.15); }
+    /* ── Recipe card ── */
+    .recipe-card { padding: 14px; border-left-color: var(--blue) !important; }
+    .recipe-card .title { margin-bottom: 5px; }
+    .macro-pill { background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; margin-bottom: 8px; display: inline-block; }
 
-    /* Recipe card */
-    .recipe-card { flex-direction: column; padding: 14px; border-left-color: var(--recipe) !important; }
-    .recipe-card .title { margin-bottom: 6px; }
-    .macro-pill { background: rgba(255,255,255,0.07); padding: 3px 10px; border-radius: 10px; font-size: 0.82rem; margin-bottom: 10px; display: inline-block; }
+    /* ── Calendar ── */
+    .week-strip { display: flex; gap: 5px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+    .week-strip::-webkit-scrollbar { display: none; }
+    .day-pill { flex: 1; min-width: 40px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; background: var(--card2); }
+    .day-pill.today { border-color: var(--accent); background: var(--accent-dim); }
+    .day-pill.selected { border-color: var(--purple); background: var(--purple-dim); }
+    .day-pill.past { opacity: 0.6; }
+    .day-name { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text3); }
+    .day-num { font-size: 1rem; font-weight: 700; }
+    .day-dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; min-height: 8px; }
+    .day-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .day-check { font-size: 0.7rem; color: var(--accent); }
+    .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .week-nav button { background: var(--card2); border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; cursor: pointer; }
+    .week-label { font-size: 0.85rem; font-weight: 600; color: var(--text2); }
+    .cal-plan { margin-top: 4px; }
+    .cal-day-header { font-size: 0.8rem; font-weight: 700; color: var(--text2); margin-bottom: 10px; padding: 6px 10px; background: var(--card2); border-radius: 7px; text-align: center; }
+
+    /* ── Habits ── */
+    .habit-card { background: var(--card2); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; border-left: 4px solid; }
+    .habit-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .habit-name { font-weight: 700; font-size: 0.97rem; }
+    .habit-streak { display: flex; align-items: center; gap: 5px; }
+    .streak-num { font-size: 1.3rem; font-weight: 800; }
+    .streak-label { font-size: 0.72rem; color: var(--text3); line-height: 1.2; }
+    .streak-best { font-size: 0.72rem; color: var(--text3); margin-bottom: 8px; }
+    .habit-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 10px; }
+    .habit-cell { width: 14px; height: 14px; border-radius: 3px; background: rgba(255,255,255,0.06); }
+    .habit-cell.done { background: var(--accent); }
+    .habit-cell.partial { background: rgba(16,185,129,0.35); }
+    .habit-cell.today-cell { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .habit-check-row { display: flex; align-items: center; gap: 10px; }
+    .habit-check-label { font-size: 0.85rem; color: var(--text2); flex-grow: 1; }
+    .habit-check-btn { background: var(--accent-dim); border: 1px solid rgba(16,185,129,0.3); color: var(--accent); border-radius: 7px; padding: 6px 14px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .habit-check-btn.checked { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── Progress / Dashboard ── */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: var(--card2); border-radius: var(--radius); padding: 14px; border-left: 4px solid; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+    .stat-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text3); }
+    .stat-sub { font-size: 0.78rem; color: var(--text2); margin-top: 4px; }
+    .stat-card.full { grid-column: 1 / -1; }
+
+    /* Trend graph */
+    .trend-card { background: var(--card2); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; border-left: 4px solid var(--accent); }
+    .trend-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 10px; }
+    .trend-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .trend-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 3px; transition: height 0.3s; position: relative; }
+    .trend-bar-label { font-size: 0.6rem; color: var(--text3); text-align: center; margin-top: 4px; }
+    .trend-labels { display: flex; gap: 4px; }
+    .trend-label { flex: 1; font-size: 0.6rem; color: var(--text3); text-align: center; }
+    .bw-value { font-size: 0.65rem; color: var(--text3); position: absolute; top: -16px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+
+    /* Measurements */
+    .measurement-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .measurement-row:last-child { border-bottom: none; }
+    .measurement-label { font-size: 0.88rem; color: var(--text2); }
+    .measurement-val { font-size: 0.97rem; font-weight: 700; }
+    .measurement-delta { font-size: 0.75rem; margin-left: 6px; }
+    .delta-up { color: var(--red); }
+    .delta-down { color: var(--accent); }
+
+    /* PR list */
+    .pr-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .pr-row:last-child { border-bottom: none; }
+    .pr-exercise { font-size: 0.9rem; font-weight: 600; }
+    .pr-detail { font-size: 0.82rem; color: var(--text2); }
+    .pr-date { font-size: 0.72rem; color: var(--text3); }
+
+    /* Weekly summary */
+    .summary-card { background: var(--card2); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; }
+    .summary-title { font-weight: 700; font-size: 0.97rem; margin-bottom: 12px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 0.86rem; padding: 5px 0; border-bottom: 1px solid var(--border); }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-key { color: var(--text2); }
+    .summary-val { font-weight: 700; }
+
+    /* Insights */
+    .insight-card { background: var(--card2); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; border-left: 4px solid var(--purple); }
+    .insight-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--purple); margin-bottom: 5px; }
+    .insight-text { font-size: 0.9rem; line-height: 1.5; }
+    .insight-empty { text-align: center; padding: 30px; color: var(--text3); font-size: 0.9rem; }
+
+    /* Readiness modal */
+    .readiness-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .readiness-item label { font-size: 0.75rem; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 600; }
+    .score-row { display: flex; gap: 5px; }
+    .score-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 5px; color: var(--text2); font-size: 0.8rem; font-weight: 700; padding: 6px 0; cursor: pointer; text-align: center; }
+    .score-btn.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    /* Journal */
+    .journal-entry { background: var(--card2); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; border-left: 4px solid var(--text3); }
+    .journal-date { font-size: 0.72rem; color: var(--text3); margin-bottom: 5px; }
+    .journal-text { font-size: 0.9rem; line-height: 1.6; color: var(--text2); }
+    .journal-write { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); padding: 13px; font-size: 0.93rem; font-family: inherit; resize: vertical; min-height: 100px; margin-bottom: 10px; }
+    .journal-write:focus { outline: none; border-color: var(--accent); }
+
+    /* Quote */
+    .quote-card { background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(167,139,250,0.08)); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; text-align: center; }
+    .quote-text { font-size: 0.92rem; line-height: 1.6; color: var(--text2); font-style: italic; margin-bottom: 6px; }
+    .quote-author { font-size: 0.75rem; color: var(--text3); font-weight: 600; }
 
     /* Backlog */
-    .backlog-list { display: flex; flex-direction: column; gap: 10px; }
-    .backlog-item { background: var(--card2); border-radius: var(--radius); padding: 14px; border-left: 4px solid var(--muted); }
-    .backlog-item.warning { border-left-color: var(--warning); }
-    .backlog-item.urgent { border-left-color: var(--danger); }
-    .backlog-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .backlog-category { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
-    .backlog-age { font-size: 0.75rem; font-weight: 700; color: var(--muted); }
-    .backlog-age.warning { color: var(--warning); }
-    .backlog-age.urgent { color: var(--danger); }
-    .backlog-label { font-weight: 600; font-size: 0.97rem; margin-bottom: 12px; }
-    .backlog-actions { display: flex; gap: 8px; }
-    .btn-reschedule { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
-    .btn-push-again { background: rgba(255,255,255,0.06); color: var(--muted2); border: none; border-radius: 7px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer; }
+    .backlog-item { background: var(--card2); border-radius: var(--radius); padding: 13px; margin-bottom: 8px; border-left: 4px solid var(--text3); }
+    .backlog-item.warning { border-left-color: var(--amber); }
+    .backlog-item.urgent { border-left-color: var(--red); }
+    .backlog-meta { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .backlog-cat { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text3); }
+    .backlog-age { font-size: 0.72rem; font-weight: 700; }
+    .backlog-age.warning { color: var(--amber); }
+    .backlog-age.urgent { color: var(--red); }
+    .backlog-label { font-weight: 600; font-size: 0.93rem; margin-bottom: 10px; }
+    .backlog-actions { display: flex; gap: 7px; }
+    .btn-reschedule { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 8px; font-size: 0.83rem; font-weight: 700; cursor: pointer; }
+    .btn-push-again { background: rgba(255,255,255,0.05); color: var(--text2); border: none; border-radius: 7px; padding: 8px 11px; font-size: 0.83rem; cursor: pointer; }
 
-    /* Modal */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: flex-end; justify-content: center; }
+    /* Modals */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; align-items: flex-end; justify-content: center; }
     .modal-overlay.open { display: flex; }
-    .modal { background: #1e2128; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
-    .modal h2 { margin: 0 0 16px; font-size: 1.1rem; }
-    .modal-field { margin-bottom: 14px; }
-    .modal-field label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 6px; }
-    .modal-field input, .modal-field textarea { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); padding: 11px 13px; font-size: 0.95rem; font-family: inherit; }
-    .modal-field input:focus, .modal-field textarea:focus { outline: none; border-color: var(--accent); }
-    .modal-field textarea { resize: vertical; min-height: 70px; }
-    .modal-hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
+    .modal { background: var(--card2); border-radius: 18px 18px 0 0; padding: 20px; width: 100%; max-height: 88vh; overflow-y: auto; }
+    .modal h2 { margin: 0 0 16px; font-size: 1.05rem; font-weight: 700; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text3); font-size: 1.2rem; cursor: pointer; padding: 4px; }
+    .modal-field { margin-bottom: 13px; }
+    .modal-field label { display: block; font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text3); margin-bottom: 5px; }
+    .modal-field input, .modal-field textarea, .modal-field select { width: 100%; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 0.93rem; font-family: inherit; }
+    .modal-field select option { background: #1a1d26; }
+    .modal-field input:focus, .modal-field textarea:focus, .modal-field select:focus { outline: none; border-color: var(--accent); }
+    .modal-field textarea { resize: vertical; min-height: 65px; }
+    .modal-hint { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+    .modal-actions { display: flex; gap: 9px; margin-top: 4px; }
+    .modal { position: relative; }
 
-    /* Settings */
-    .settings-card { background: var(--card2); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; border-left: 4px solid #9c27b0; }
-    .settings-card .title { font-weight: 700; margin-bottom: 6px; }
-    .settings-card .details { color: var(--muted2); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.5; }
-    .settings-input { width: 100%; padding: 12px; margin-bottom: 12px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; }
-    .settings-input:focus { outline: none; border-color: var(--accent); }
+    /* Add task btn */
+    .btn-add-task { width: 100%; margin-top: 6px; padding: 11px; background: rgba(16,185,129,0.06); color: var(--accent); border: 1px dashed rgba(16,185,129,0.25); border-radius: var(--radius); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 
     /* Nav */
-    .nav { position: fixed; bottom: 0; width: 100%; background: rgba(26,29,36,0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.06); z-index: 20; }
-    .nav button { background: none; border: none; color: var(--muted); font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.18s; min-width: 52px; }
-    .nav button svg { width: 20px; height: 20px; }
-    .nav button.active { color: var(--accent); background: rgba(16,185,129,0.1); }
+    .nav { position: fixed; bottom: 0; width: 100%; background: rgba(20,23,32,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; justify-content: space-around; padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); z-index: 20; }
+    .nav button { background: none; border: none; color: var(--text3); font-size: 0.65rem; font-weight: 600; cursor: pointer; padding: 5px 8px; border-radius: 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.15s; min-width: 46px; }
+    .nav button svg { width: 19px; height: 19px; }
+    .nav button.active { color: var(--accent); background: var(--accent-dim); }
+
+    /* Buttons */
+    .btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 9px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+    .btn-primary:active { background: var(--accent2); }
+    .btn-secondary { flex: 1; padding: 13px; background: rgba(255,255,255,0.05); color: var(--text2); border: none; border-radius: 9px; font-size: 0.95rem; cursor: pointer; }
+    .settings-input { width: 100%; padding: 12px; margin-bottom: 11px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; font-size: 0.93rem; }
+    .settings-input:focus { outline: none; border-color: var(--accent); }
 
     /* States */
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
-    .error-state { text-align: center; padding: 20px; color: #ff6b6b; font-size: 0.9rem; line-height: 1.5; }
-    .loader { text-align: center; padding: 40px; color: var(--muted); }
+    .empty-state { text-align: center; padding: 36px 20px; color: var(--text3); font-size: 0.92rem; line-height: 1.6; }
+    .error-state { text-align: center; padding: 18px; color: #ff6b6b; font-size: 0.88rem; line-height: 1.5; }
+    .loader { text-align: center; padding: 36px; color: var(--text3); }
+    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin: 16px 0 8px 2px; }
 
     /* Toast */
-    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e2128; color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 9px 20px; font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 100; white-space: nowrap; }
+    #toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--card2); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; font-weight: 600; opacity: 0; transition: opacity 0.22s, transform 0.22s; pointer-events: none; z-index: 100; white-space: nowrap; box-shadow: var(--shadow); }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Primary button */
-    .btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 0.97rem; font-weight: 700; cursor: pointer; }
-    .btn-primary:active { background: var(--accent-hover); }
-    .btn-secondary { flex: 1; padding: 13px; background: rgba(255,255,255,0.06); color: var(--muted2); border: none; border-radius: 8px; font-size: 0.97rem; cursor: pointer; }
+    /* Warn / deload banner */
+    .banner { border-radius: var(--radius-sm); padding: 10px 13px; margin-bottom: 10px; font-size: 0.84rem; line-height: 1.5; font-weight: 500; }
+    .banner.warn { background: var(--amber-dim); border-left: 3px solid var(--amber); color: var(--amber); }
+    .banner.info { background: var(--accent-dim); border-left: 3px solid var(--accent); color: var(--accent); }
+    .banner.alert { background: var(--red-dim); border-left: 3px solid var(--red); color: var(--red); }
+
+    /* Check-in */
+    .checkin-card { background: var(--card2); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--purple); }
+    .checkin-q { font-size: 0.82rem; color: var(--text3); font-weight: 600; margin-bottom: 5px; }
+    .checkin-a { font-size: 0.9rem; line-height: 1.5; color: var(--text2); }
+
+    .tab-pills { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+    .tab-pills::-webkit-scrollbar { display: none; }
+    .tab-pill { background: var(--card2); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); font-size: 0.78rem; font-weight: 600; padding: 5px 13px; cursor: pointer; white-space: nowrap; }
+    .tab-pill.active { background: var(--accent-dim); border-color: rgba(16,185,129,0.3); color: var(--accent); }
   </style>
 </head>
 <body>
 
 <header>
-  <h1 id="header-title">Today's Plan</h1>
+  <div class="header-title" id="header-title">Today</div>
+  <div class="header-right">
+    <div class="consistency-badge" id="consistency-badge">—%</div>
+    <div class="readiness-badge" id="readiness-badge" onclick="openReadinessModal()">Log Readiness</div>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- LOGS -->
-  <div id="logs-view" class="view active">
+  <!-- TODAY -->
+  <div id="today-view" class="view active">
+    <div id="quote-container"></div>
+    <div id="banners-container"></div>
     <div id="logs-container" class="loader">Loading…</div>
+    <div id="tasks-container"></div>
   </div>
 
-  <!-- TASKS -->
-  <div id="tasks-view" class="view">
-    <div id="tasks-container" class="loader">Loading…</div>
+  <!-- CALENDAR -->
+  <div id="calendar-view" class="view">
+    <div class="week-nav">
+      <button onclick="shiftWeek(-1)">← Prev</button>
+      <span class="week-label" id="week-label"></span>
+      <button onclick="shiftWeek(1)">Next →</button>
+    </div>
+    <div class="week-strip" id="week-strip"></div>
+    <div class="cal-plan" id="cal-plan"><div class="empty-state">Tap a day to see its plan.</div></div>
   </div>
 
-  <!-- BACKLOG -->
-  <div id="backlog-view" class="view">
-    <div id="backlog-container" class="loader">Loading…</div>
+  <!-- HABITS -->
+  <div id="habits-view" class="view">
+    <div id="habits-container" class="loader">Loading…</div>
   </div>
 
-  <!-- RECIPES -->
-  <div id="recipes-view" class="view">
-    <div id="recipes-container" class="loader">Loading…</div>
+  <!-- PROGRESS -->
+  <div id="progress-view" class="view">
+    <div class="tab-pills" id="progress-tabs">
+      <div class="tab-pill active" onclick="switchProgressTab('overview')">Overview</div>
+      <div class="tab-pill" onclick="switchProgressTab('body')">Body</div>
+      <div class="tab-pill" onclick="switchProgressTab('prs')">PRs</div>
+      <div class="tab-pill" onclick="switchProgressTab('insights')">Insights</div>
+      <div class="tab-pill" onclick="switchProgressTab('journal')">Journal</div>
+      <div class="tab-pill" onclick="switchProgressTab('backlog')">Backlog</div>
+    </div>
+    <div id="progress-overview" class="progress-sub"></div>
+    <div id="progress-body" class="progress-sub" style="display:none"></div>
+    <div id="progress-prs" class="progress-sub" style="display:none"></div>
+    <div id="progress-insights" class="progress-sub" style="display:none"></div>
+    <div id="progress-journal" class="progress-sub" style="display:none"></div>
+    <div id="progress-backlog" class="progress-sub" style="display:none"></div>
   </div>
 
   <!-- SETTINGS -->
   <div id="settings-view" class="view">
-    <div class="settings-card">
-      <div class="title">Database Connection</div>
-      <div class="details">Paste your Google Apps Script Web App URL. Stored locally on this device.</div>
-      <input type="text" id="api-url-input" class="settings-input" placeholder="https://script.google.com/macros/s/…">
-      <button class="btn-primary" onclick="saveApiUrl()">Save & Reconnect</button>
+    <div class="section-title">Connection</div>
+    <div class="card" style="border-left-color:#9c27b0; overflow:visible;">
+      <div class="card-main" style="flex-direction:column; cursor:default;">
+        <div class="title" style="margin-bottom:6px;">Google Apps Script URL</div>
+        <div class="details" style="margin-bottom:12px;">Stored locally on this device. Never shared.</div>
+        <input type="text" id="api-url-input" class="settings-input" placeholder="https://script.google.com/macros/s/…">
+        <button class="btn-primary" onclick="saveApiUrl()">Save & Reconnect</button>
+      </div>
     </div>
-    <div id="settings-status" style="margin-top:8px; text-align:center; color:var(--accent); font-weight:700; font-size:0.9rem;"></div>
+    <div id="settings-status" style="margin-top:8px; text-align:center; color:var(--accent); font-weight:700; font-size:0.88rem;"></div>
+
+    <div class="section-title">Measurements</div>
+    <div class="card" style="border-left-color:var(--pink); overflow:visible;">
+      <div class="card-main" style="flex-direction:column; cursor:default;">
+        <div class="title" style="margin-bottom:12px;">Log Measurements</div>
+        <div class="input-row">
+          <label>Chest (cm)<input type="number" class="actual-field" id="m-chest" placeholder="0" step="0.1"></label>
+          <label>Waist (cm)<input type="number" class="actual-field" id="m-waist" placeholder="0" step="0.1"></label>
+        </div>
+        <div class="input-row">
+          <label>Hips (cm)<input type="number" class="actual-field" id="m-hips" placeholder="0" step="0.1"></label>
+          <label>Arms (cm)<input type="number" class="actual-field" id="m-arms" placeholder="0" step="0.1"></label>
+        </div>
+        <div class="input-row">
+          <label>Thighs (cm)<input type="number" class="actual-field" id="m-thighs" placeholder="0" step="0.1"></label>
+          <label>Neck (cm)<input type="number" class="actual-field" id="m-neck" placeholder="0" step="0.1"></label>
+        </div>
+        <button class="btn-primary" onclick="saveMeasurements()">Save Measurements</button>
+      </div>
+    </div>
+
+    <div class="section-title">Weekly Check-in</div>
+    <div class="card" style="border-left-color:var(--purple); overflow:visible;">
+      <div class="card-main" style="flex-direction:column; cursor:default;">
+        <div class="title" style="margin-bottom:12px;">Weekly Reflection</div>
+        <div class="modal-field">
+          <label>What went well?</label>
+          <textarea id="ci-well" placeholder="e.g. Hit all workouts, protein on track…"></textarea>
+        </div>
+        <div class="modal-field">
+          <label>What to improve?</label>
+          <textarea id="ci-improve" placeholder="e.g. Sleep was poor, skipped cardio…"></textarea>
+        </div>
+        <div class="modal-field">
+          <label>Goal for next week</label>
+          <textarea id="ci-goal" placeholder="e.g. Add 2.5kg to squat…"></textarea>
+        </div>
+        <button class="btn-primary" onclick="saveCheckin()">Save Check-in</button>
+      </div>
+    </div>
   </div>
 
 </div>
 
 <!-- Add Task Modal -->
-<div class="modal-overlay" id="add-task-modal" onclick="if(event.target===this)closeAddTaskModal()">
+<div class="modal-overlay" id="add-task-modal" onclick="if(event.target===this)closeModal('add-task-modal')">
   <div class="modal">
     <h2>Add Task</h2>
-    <div class="modal-field">
-      <label>Category</label>
-      <input type="text" id="new-task-category" placeholder="e.g. Guitar, Reading, Work">
-    </div>
-    <div class="modal-field">
-      <label>Task name</label>
-      <input type="text" id="new-task-name" placeholder="e.g. Guitar practice">
-    </div>
+    <div class="modal-field"><label>Category</label><input type="text" id="new-task-category" placeholder="Guitar, Reading, Work…"></div>
+    <div class="modal-field"><label>Task name</label><input type="text" id="new-task-name" placeholder="e.g. Guitar practice"></div>
     <div class="modal-field">
       <label>Subtasks</label>
-      <textarea id="new-task-subtasks" placeholder="One per line, e.g:&#10;Scales (10 mins)&#10;Chord transitions&#10;Song run-through"></textarea>
-      <div class="modal-hint">Each line becomes a checkable subtask.</div>
+      <textarea id="new-task-subtasks" placeholder="One per line:&#10;Scales (10 mins)&#10;Chord transitions&#10;Song run-through"></textarea>
+      <div class="modal-hint">Each line = one checkable subtask</div>
     </div>
-    <div class="modal-field">
-      <label>Notes</label>
-      <input type="text" id="new-task-notes" placeholder="Optional notes">
-    </div>
+    <div class="modal-field"><label>Notes</label><input type="text" id="new-task-notes" placeholder="Optional"></div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeAddTaskModal()">Cancel</button>
+      <button class="btn-secondary" onclick="closeModal('add-task-modal')">Cancel</button>
       <button class="btn-primary" style="flex:2" onclick="submitAddTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Readiness Modal -->
+<div class="modal-overlay" id="readiness-modal" onclick="if(event.target===this)closeModal('readiness-modal')">
+  <div class="modal">
+    <h2>Morning Readiness</h2>
+    <div class="readiness-grid">
+      <div class="readiness-item">
+        <label>Sleep Quality</label>
+        <div class="score-row" id="score-sleep"></div>
+      </div>
+      <div class="readiness-item">
+        <label>Soreness</label>
+        <div class="score-row" id="score-soreness"></div>
+      </div>
+      <div class="readiness-item">
+        <label>Stress</label>
+        <div class="score-row" id="score-stress"></div>
+      </div>
+    </div>
+    <div class="modal-field"><label>Sleep Hours</label><input type="number" id="sleep-hours" placeholder="7.5" step="0.5" min="0" max="16"></div>
+    <div class="modal-field"><label>Notes</label><input type="text" id="readiness-notes" placeholder="Optional"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('readiness-modal')">Cancel</button>
+      <button class="btn-primary" style="flex:2" onclick="saveReadiness()">Save</button>
     </div>
   </div>
 </div>
 
 <!-- Nav -->
 <div class="nav">
-  <button id="btn-logs" class="active" onclick="switchTab('logs')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-    Workout
+  <button id="btn-today" class="active" onclick="switchTab('today')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    Today
   </button>
-  <button id="btn-tasks" onclick="switchTab('tasks')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9 11.41L6.59 9 5.17 10.41 9 14.25l9-9L16.58 3.83z"/><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
-    Tasks
+  <button id="btn-calendar" onclick="switchTab('calendar')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V8h14v13zM7 10h5v5H7z"/></svg>
+    Calendar
   </button>
-  <button id="btn-backlog" onclick="switchTab('backlog')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-    Backlog
+  <button id="btn-habits" onclick="switchTab('habits')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    Habits
   </button>
-  <button id="btn-recipes" onclick="switchTab('recipes')">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
-    Meals
+  <button id="btn-progress" onclick="switchTab('progress')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+    Progress
   </button>
   <button id="btn-settings" onclick="switchTab('settings')">
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
