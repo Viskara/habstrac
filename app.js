@@ -49,7 +49,9 @@ function switchTab(tab) {
 async function loadLogs() {
   if (!API_URL) return;
   try {
-    const response = await fetch(`${API_URL}?action=getLogs`);
+    const response = await fetch(`${API_URL}?action=getLogs`, {
+      redirect: 'follow'
+    });
     const data = await response.json();
     
     // Get today's date in YYYY-MM-DD local time
@@ -60,18 +62,28 @@ async function loadLogs() {
     const todaysTasks = data.filter(row => row.Date === localISOTime);
     renderLogs(todaysTasks, localISOTime);
   } catch (err) {
-    document.getElementById('logs-container').innerHTML = '<div style="text-align:center; padding:20px;">Error loading data. Check URL.</div>';
+    console.error('Logs fetch error:', err);
+    document.getElementById('logs-container').innerHTML = `
+      <div style="text-align:center; padding:20px; color: #ff6b6b;">
+        <p><strong>Error loading data.</strong></p>
+        <p style="font-size: 0.9rem; color: var(--muted);">If you see a CORS error in the console, your Google Apps Script is likely returning an HTML login or error page instead of JSON.</p>
+        <p style="font-size: 0.9rem; color: var(--muted);">Ensure your script is deployed as a <strong>New Version</strong>, executed as <strong>"Me"</strong>, and access is set to <strong>"Anyone"</strong>.</p>
+      </div>`;
   }
 }
 
 async function loadRecipes() {
   if (!API_URL) return;
   try {
-    const response = await fetch(`${API_URL}?action=getRecipes`);
+    const response = await fetch(`${API_URL}?action=getRecipes`, {
+      redirect: 'follow'
+    });
     const data = await response.json();
     renderRecipes(data);
   } catch (err) {
-    document.getElementById('recipes-container').innerHTML = '<div style="text-align:center; padding:20px;">Error loading recipes.</div>';
+    console.error('Recipes fetch error:', err);
+    document.getElementById('recipes-container').innerHTML = `
+      <div style="text-align:center; padding:20px; color: #ff6b6b;">Error loading recipes. Check console and deployment settings.</div>`;
   }
 }
 
