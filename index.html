@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Recomp Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root { 
+      --bg: #0f1115; 
+      --card: #1e2128; 
+      --text: #f0f2f5; 
+      --accent: #10b981; 
+      --accent-hover: #059669; 
+      --muted: #9ca3af; 
+      --nutrition: #f59e0b;
+      --recipe: #3b82f6;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
+    
+    header { padding: 20px; background: rgba(30, 33, 40, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+    h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
+    .container { padding: 15px; }
+    
+    .card { background: var(--card); padding: 18px; margin-bottom: 16px; border-radius: 12px; border-left: 5px solid var(--accent); display: flex; align-items: flex-start; box-shadow: var(--card-shadow); transition: transform 0.2s ease; }
+    .card:active { transform: scale(0.98); }
+    .card.nutrition { border-left-color: var(--nutrition); }
+    .card.recipe { border-left-color: var(--recipe); flex-direction: column; }
+    .card-content { flex-grow: 1; }
+    .title { font-weight: 600; font-size: 1.1rem; margin-bottom: 6px; }
+    .details { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+    
+    /* Custom Checkbox */
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 26px;
+      height: 26px;
+      border: 2px solid var(--muted);
+      border-radius: 50%;
+      margin-right: 16px;
+      margin-top: 2px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    input[type="checkbox"]:checked { background-color: var(--accent); border-color: var(--accent); }
+    input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: white; font-size: 16px; font-weight: bold; left: 5px; top: 1px; }
+    
+    .completed { opacity: 0.5; }
+    .completed .title { text-decoration: line-through; }
+    
+    .macro-pill { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; color: var(--text); margin-bottom: 12px; display: inline-block; }
+    
+    /* Bottom Nav */
+    .nav { position: fixed; bottom: 0; width: 100%; background: rgba(30, 33, 40, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.05); z-index: 10; }
+    .nav button { background: none; border: none; color: var(--muted); font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.2s ease; }
+    .nav button svg { width: 22px; height: 22px; opacity: 0.8; }
+    .nav button.active { color: var(--accent); background: rgba(16, 185, 129, 0.1); }
+    .nav button.active svg { opacity: 1; }
+    
+    /* UI States */
+    .loader { text-align: center; padding: 40px; color: var(--muted); }
+    .view { display: none; }
+    .view.active { display: block; }
+    
+    /* Inputs */
+    input[type="url"], input[type="text"] { width: 100%; padding: 14px; margin-bottom: 15px; background: rgba(0,0,0,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-sizing: border-box; font-size: 1rem; transition: border-color 0.2s; }
+    input[type="url"]:focus, input[type="text"]:focus { outline: none; border-color: var(--accent); }
+    .btn-primary { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:active { background: var(--accent-hover); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="header-title">Today's Plan</h1>
+  </header>
+
+  <div class="container">
+    <div id="logs-view" class="view active">
+      <div id="logs-container" class="loader">Loading today's setup...</div>
+    </div>
+    
+    <div id="recipes-view" class="view">
+      <div id="recipes-container" class="loader">Loading prep specs...</div>
+    </div>
+
+    <div id="settings-view" class="view">
+      <div class="card" style="flex-direction: column; border-left-color: #9c27b0;">
+        <div class="title">Database Connection</div>
+        <div class="details" style="margin-bottom: 15px;">Paste your Google Apps Script Web App URL below. This is stored securely on your device.</div>
+        <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/...">
+        <button class="btn-primary" onclick="saveApiUrl()">Save Endpoint</button>
+      </div>
+      <div id="settings-status" style="margin-top: 10px; text-align: center; color: var(--accent); font-weight: bold;"></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button id="btn-logs" class="active" onclick="switchTab('logs')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      Daily Logs
+    </button>
+    <button id="btn-recipes" onclick="switchTab('recipes')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
+      Meal Prep
+    </button>
+    <button id="btn-settings" onclick="switchTab('settings')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Settings
+    </button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
