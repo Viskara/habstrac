@@ -53,6 +53,11 @@ async function loadLogs() {
       redirect: 'follow'
     });
     const data = await response.json();
+
+    // If the backend returned an error object instead of an array, throw it
+    if (data && data.error) {
+      throw new Error(data.error);
+    }
     
     // Get today's date in YYYY-MM-DD local time
     const today = new Date();
@@ -79,6 +84,11 @@ async function loadRecipes() {
       redirect: 'follow'
     });
     const data = await response.json();
+
+    // If the backend returned an error object instead of an array, throw it
+    if (data && data.error) {
+      throw new Error(data.error);
+    }
     renderRecipes(data);
   } catch (err) {
     console.error('Recipes fetch error:', err);
