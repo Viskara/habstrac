@@ -7,114 +7,251 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon-192.png">
   <style>
-    :root { 
-      --bg: #0f1115; 
-      --card: #1e2128; 
-      --text: #f0f2f5; 
-      --accent: #10b981; 
-      --accent-hover: #059669; 
-      --muted: #9ca3af; 
-      --nutrition: #f59e0b;
+    :root {
+      --bg: #0f1115;
+      --card: #1a1d24;
+      --card2: #1e2128;
+      --text: #f0f2f5;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --muted: #6b7280;
+      --muted2: #9ca3af;
+      --danger: #ef4444;
+      --warning: #f59e0b;
       --recipe: #3b82f6;
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --radius: 10px;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
-    
-    header { padding: 20px; background: rgba(30, 33, 40, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
-    h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
-    .container { padding: 15px; }
-    
-    .card { background: var(--card); padding: 18px; margin-bottom: 16px; border-radius: 12px; border-left: 5px solid var(--accent); display: flex; align-items: flex-start; box-shadow: var(--card-shadow); transition: transform 0.2s ease; }
-    .card:active { transform: scale(0.98); }
-    .card.nutrition { border-left-color: var(--nutrition); }
-    .card.recipe { border-left-color: var(--recipe); flex-direction: column; }
-    .card-content { flex-grow: 1; }
-    .title { font-weight: 600; font-size: 1.1rem; margin-bottom: 6px; }
-    .details { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
-    
-    /* Custom Checkbox */
-    input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 26px;
-      height: 26px;
-      border: 2px solid var(--muted);
-      border-radius: 50%;
-      margin-right: 16px;
-      margin-top: 2px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-    }
-    input[type="checkbox"]:checked { background-color: var(--accent); border-color: var(--accent); }
-    input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: white; font-size: 16px; font-weight: bold; left: 5px; top: 1px; }
-    
-    .completed { opacity: 0.5; }
-    .completed .title { text-decoration: line-through; }
-    
-    .macro-pill { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; color: var(--text); margin-bottom: 12px; display: inline-block; }
-    
-    /* Bottom Nav */
-    .nav { position: fixed; bottom: 0; width: 100%; background: rgba(30, 33, 40, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.05); z-index: 10; }
-    .nav button { background: none; border: none; color: var(--muted); font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.2s ease; }
-    .nav button svg { width: 22px; height: 22px; opacity: 0.8; }
-    .nav button.active { color: var(--accent); background: rgba(16, 185, 129, 0.1); }
-    .nav button.active svg { opacity: 1; }
-    
-    /* UI States */
-    .loader { text-align: center; padding: 40px; color: var(--muted); }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0 0 80px; -webkit-tap-highlight-color: transparent; font-size: 15px; }
+
+    /* Header */
+    header { padding: 16px 20px; background: rgba(26,29,36,0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; }
+    h1 { margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; }
+
+    .container { padding: 14px; }
     .view { display: none; }
     .view.active { display: block; }
-    
-    /* Inputs */
-    input[type="url"], input[type="text"] { width: 100%; padding: 14px; margin-bottom: 15px; background: rgba(0,0,0,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-sizing: border-box; font-size: 1rem; transition: border-color 0.2s; }
-    input[type="url"]:focus, input[type="text"]:focus { outline: none; border-color: var(--accent); }
-    .btn-primary { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+
+    /* Sections */
+    .section { margin-bottom: 18px; }
+    .section-header { display: flex; align-items: center; gap: 8px; padding: 7px 12px; margin-bottom: 6px; border-left: 4px solid; border-radius: 4px; background: rgba(255,255,255,0.03); }
+    .section-icon { font-size: 0.95rem; }
+    .section-label { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted2); flex-grow: 1; }
+    .section-badge { font-size: 0.72rem; font-weight: 700; color: var(--accent); background: rgba(16,185,129,0.15); padding: 2px 8px; border-radius: 10px; }
+
+    /* Cards */
+    .card { background: var(--card2); margin-bottom: 8px; border-radius: var(--radius); border-left: 4px solid var(--accent); box-shadow: var(--shadow); overflow: hidden; }
+    .card-main { display: flex; align-items: flex-start; padding: 14px 14px 12px; cursor: pointer; }
+    .card-main:active { background: rgba(255,255,255,0.02); }
+    .card-content { flex-grow: 1; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .title { font-weight: 600; font-size: 0.97rem; line-height: 1.3; }
+    .details { color: var(--muted2); font-size: 0.84rem; line-height: 1.5; margin-top: 4px; }
+    .note-text { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+    .card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .expand-icon { color: var(--muted); font-size: 0.9rem; transition: transform 0.2s; }
+    .card.expanded .expand-icon { transform: rotate(180deg); }
+
+    /* Completed state */
+    .card.is-completed .card-main { opacity: 0.45; }
+    .completed .title { text-decoration: line-through; }
+    .card.is-pushed { border-left-color: var(--warning) !important; }
+    .card.is-skipped { opacity: 0.35; }
+
+    /* Expandable area */
+    .card-expand { display: none; border-top: 1px solid rgba(255,255,255,0.06); }
+    .card.expanded .card-expand { display: block; }
+
+    /* Actual inputs */
+    .actual-inputs { padding: 14px; }
+    .actual-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; }
+    .input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .input-row label { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; color: var(--muted2); flex: 1; min-width: 70px; }
+    .actual-field { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); padding: 8px 10px; font-size: 0.95rem; width: 100%; transition: border-color 0.2s; }
+    .actual-field:focus { outline: none; border-color: var(--accent); }
+    .actual-notes { width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: var(--text); padding: 9px 11px; font-size: 0.88rem; resize: vertical; min-height: 64px; margin-bottom: 12px; font-family: inherit; }
+    .actual-notes:focus { outline: none; border-color: var(--accent); }
+    .expand-actions { display: flex; gap: 8px; }
+    .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 9px 18px; font-size: 0.88rem; font-weight: 700; cursor: pointer; flex: 1; }
+    .btn-save:active { background: var(--accent-hover); }
+    .btn-skip { background: rgba(255,255,255,0.06); color: var(--muted2); border: none; border-radius: 7px; padding: 9px 14px; font-size: 0.88rem; cursor: pointer; }
+
+    /* Push button */
+    .push-btn { background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: var(--muted2); font-size: 0.78rem; padding: 3px 7px; cursor: pointer; display: flex; align-items: center; gap: 3px; }
+    .push-btn:active { background: rgba(245,158,11,0.1); border-color: var(--warning); }
+    .push-count { color: var(--warning); font-weight: 700; }
+    .pushed-tag { font-size: 0.75rem; color: var(--warning); margin-top: 5px; }
+
+    /* Checkbox */
+    input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid var(--muted); border-radius: 50%; margin-right: 12px; margin-top: 1px; cursor: pointer; position: relative; transition: all 0.18s; flex-shrink: 0; }
+    input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+    input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 13px; font-weight: 700; left: 3px; top: 2px; }
+
+    /* Subtasks */
+    .subtask-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+    .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--muted2); cursor: pointer; }
+    .subtask-item input[type=checkbox] { width: 18px; height: 18px; margin: 0; }
+    .subtask-progress { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
+
+    /* Add task button */
+    .btn-add-task { width: 100%; margin-top: 8px; padding: 12px; background: rgba(16,185,129,0.08); color: var(--accent); border: 1px dashed rgba(16,185,129,0.3); border-radius: var(--radius); font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+    .btn-add-task:active { background: rgba(16,185,129,0.15); }
+
+    /* Recipe card */
+    .recipe-card { flex-direction: column; padding: 14px; border-left-color: var(--recipe) !important; }
+    .recipe-card .title { margin-bottom: 6px; }
+    .macro-pill { background: rgba(255,255,255,0.07); padding: 3px 10px; border-radius: 10px; font-size: 0.82rem; margin-bottom: 10px; display: inline-block; }
+
+    /* Backlog */
+    .backlog-list { display: flex; flex-direction: column; gap: 10px; }
+    .backlog-item { background: var(--card2); border-radius: var(--radius); padding: 14px; border-left: 4px solid var(--muted); }
+    .backlog-item.warning { border-left-color: var(--warning); }
+    .backlog-item.urgent { border-left-color: var(--danger); }
+    .backlog-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .backlog-category { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
+    .backlog-age { font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+    .backlog-age.warning { color: var(--warning); }
+    .backlog-age.urgent { color: var(--danger); }
+    .backlog-label { font-weight: 600; font-size: 0.97rem; margin-bottom: 12px; }
+    .backlog-actions { display: flex; gap: 8px; }
+    .btn-reschedule { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+    .btn-push-again { background: rgba(255,255,255,0.06); color: var(--muted2); border: none; border-radius: 7px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: flex-end; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #1e2128; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
+    .modal h2 { margin: 0 0 16px; font-size: 1.1rem; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 6px; }
+    .modal-field input, .modal-field textarea { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); padding: 11px 13px; font-size: 0.95rem; font-family: inherit; }
+    .modal-field input:focus, .modal-field textarea:focus { outline: none; border-color: var(--accent); }
+    .modal-field textarea { resize: vertical; min-height: 70px; }
+    .modal-hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
+
+    /* Settings */
+    .settings-card { background: var(--card2); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; border-left: 4px solid #9c27b0; }
+    .settings-card .title { font-weight: 700; margin-bottom: 6px; }
+    .settings-card .details { color: var(--muted2); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.5; }
+    .settings-input { width: 100%; padding: 12px; margin-bottom: 12px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; }
+    .settings-input:focus { outline: none; border-color: var(--accent); }
+
+    /* Nav */
+    .nav { position: fixed; bottom: 0; width: 100%; background: rgba(26,29,36,0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.06); z-index: 20; }
+    .nav button { background: none; border: none; color: var(--muted); font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.18s; min-width: 52px; }
+    .nav button svg { width: 20px; height: 20px; }
+    .nav button.active { color: var(--accent); background: rgba(16,185,129,0.1); }
+
+    /* States */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+    .error-state { text-align: center; padding: 20px; color: #ff6b6b; font-size: 0.9rem; line-height: 1.5; }
+    .loader { text-align: center; padding: 40px; color: var(--muted); }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e2128; color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 9px 20px; font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 100; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Primary button */
+    .btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 0.97rem; font-weight: 700; cursor: pointer; }
     .btn-primary:active { background: var(--accent-hover); }
+    .btn-secondary { flex: 1; padding: 13px; background: rgba(255,255,255,0.06); color: var(--muted2); border: none; border-radius: 8px; font-size: 0.97rem; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1 id="header-title">Today's Plan</h1>
-  </header>
+<header>
+  <h1 id="header-title">Today's Plan</h1>
+</header>
 
-  <div class="container">
-    <div id="logs-view" class="view active">
-      <div id="logs-container" class="loader">Loading today's setup...</div>
-    </div>
-    
-    <div id="recipes-view" class="view">
-      <div id="recipes-container" class="loader">Loading prep specs...</div>
-    </div>
+<div class="container">
 
-    <div id="settings-view" class="view">
-      <div class="card" style="flex-direction: column; border-left-color: #9c27b0;">
-        <div class="title">Database Connection</div>
-        <div class="details" style="margin-bottom: 15px;">Paste your Google Apps Script Web App URL below. This is stored securely on your device.</div>
-        <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/...">
-        <button class="btn-primary" onclick="saveApiUrl()">Save Endpoint</button>
-      </div>
-      <div id="settings-status" style="margin-top: 10px; text-align: center; color: var(--accent); font-weight: bold;"></div>
-    </div>
+  <!-- LOGS -->
+  <div id="logs-view" class="view active">
+    <div id="logs-container" class="loader">Loading…</div>
   </div>
 
-  <div class="nav">
-    <button id="btn-logs" class="active" onclick="switchTab('logs')">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-      Daily Logs
-    </button>
-    <button id="btn-recipes" onclick="switchTab('recipes')">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
-      Meal Prep
-    </button>
-    <button id="btn-settings" onclick="switchTab('settings')">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-      Settings
-    </button>
+  <!-- TASKS -->
+  <div id="tasks-view" class="view">
+    <div id="tasks-container" class="loader">Loading…</div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- BACKLOG -->
+  <div id="backlog-view" class="view">
+    <div id="backlog-container" class="loader">Loading…</div>
+  </div>
+
+  <!-- RECIPES -->
+  <div id="recipes-view" class="view">
+    <div id="recipes-container" class="loader">Loading…</div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings-view" class="view">
+    <div class="settings-card">
+      <div class="title">Database Connection</div>
+      <div class="details">Paste your Google Apps Script Web App URL. Stored locally on this device.</div>
+      <input type="text" id="api-url-input" class="settings-input" placeholder="https://script.google.com/macros/s/…">
+      <button class="btn-primary" onclick="saveApiUrl()">Save & Reconnect</button>
+    </div>
+    <div id="settings-status" style="margin-top:8px; text-align:center; color:var(--accent); font-weight:700; font-size:0.9rem;"></div>
+  </div>
+
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="add-task-modal" onclick="if(event.target===this)closeAddTaskModal()">
+  <div class="modal">
+    <h2>Add Task</h2>
+    <div class="modal-field">
+      <label>Category</label>
+      <input type="text" id="new-task-category" placeholder="e.g. Guitar, Reading, Work">
+    </div>
+    <div class="modal-field">
+      <label>Task name</label>
+      <input type="text" id="new-task-name" placeholder="e.g. Guitar practice">
+    </div>
+    <div class="modal-field">
+      <label>Subtasks</label>
+      <textarea id="new-task-subtasks" placeholder="One per line, e.g:&#10;Scales (10 mins)&#10;Chord transitions&#10;Song run-through"></textarea>
+      <div class="modal-hint">Each line becomes a checkable subtask.</div>
+    </div>
+    <div class="modal-field">
+      <label>Notes</label>
+      <input type="text" id="new-task-notes" placeholder="Optional notes">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAddTaskModal()">Cancel</button>
+      <button class="btn-primary" style="flex:2" onclick="submitAddTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <button id="btn-logs" class="active" onclick="switchTab('logs')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+    Workout
+  </button>
+  <button id="btn-tasks" onclick="switchTab('tasks')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9 11.41L6.59 9 5.17 10.41 9 14.25l9-9L16.58 3.83z"/><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
+    Tasks
+  </button>
+  <button id="btn-backlog" onclick="switchTab('backlog')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    Backlog
+  </button>
+  <button id="btn-recipes" onclick="switchTab('recipes')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
+    Meals
+  </button>
+  <button id="btn-settings" onclick="switchTab('settings')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    Settings
+  </button>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
